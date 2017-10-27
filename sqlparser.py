@@ -184,7 +184,6 @@ def sqlparse(sql):
             beingUsed = True
             attrUsed.append( pair[0] )
         for table in tables:
-            print("Table: " + table[0])
             if (pair[1] == str(table[0].upper())):
                 beingUsed = True
                 attrUsed.append( pair[0] )
@@ -265,6 +264,10 @@ def sqlparse(sql):
                                 break
                         if (valid == False):
                             print(exp[0] + " in the where clause is not a valid attribute")
+
+    print()
+    print("-------------------------------------------")
+    print()
 
     # RELATIONAL ALGEBRA TRANSLATION
     Aggfunc = ['COUNT', 'MAX', 'MAX', 'AVG', 'SUM']
