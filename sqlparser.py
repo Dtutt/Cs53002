@@ -78,8 +78,9 @@ def sqlparse(sql):
 
     # Begin validation
     try:
-        print(sql, "\n-----\n", SQLParser.parseString(sql), "\n")
+        print(sql, "\n-------------------------------------------\n", SQLParser.parseString(sql), "")
         parsedQuery = SQLParser.parseString(sql)
+        print("-------------------------------------------")
     except Exception as e:
         print("-------------------------------------------")
         print("SYNTAX ERROR PARSING: " + sql)
@@ -90,7 +91,8 @@ def sqlparse(sql):
 
     # List of tables being used
     tables = parsedQuery[3]
-    # attributes: list of attributes and their type (comes after select)
+    tables_rename = []
+    # List of attributes being used in select
     attributes = parsedQuery[1]
 
     # Define the schema
@@ -118,10 +120,13 @@ def sqlparse(sql):
 
     # Check if the table used in the query are valid based on the schema
     for item in tables:
-        if (str(item[0]).upper() != sailors[0][1].upper()) and (str(item[0]).upper() != reserves[0][1].upper()) and (
-            str(item[0]).upper() != boats[0][1].upper()):
+        if (str(item[0]).upper() != sailors[0][1].upper()) and (str(item[0]).upper() != reserves[0][1].upper()) and (str(item[0]).upper() != boats[0][1].upper()):
             print(item[0] + " is not a table in the schema.")
-            # Do something since a table is invalid
+        else:
+            # Check for renaming
+            if ( len(item) > 2 ):
+                tables_rename.append( item[2].upper() )
+
 
     # Check if the select attributes are valid according to the schema and what tables are being used in the query
     # - Iterate through each attributes
@@ -138,6 +143,9 @@ def sqlparse(sql):
         else:
             attr = attribute[0]
         if "." in attr:
+            # Check if table is valid
+            if attr.split(".")[0] not in tables_rename:
+                print(attr.split(".")[0] + " is not a valid renamed table.")
             attr = attr.split(".")[1]
         # Check if the attribute is in any of the tables in the schema
         isInTable = False
@@ -146,35 +154,42 @@ def sqlparse(sql):
             if (item[0].upper() == attr or attr == "*"):
                 isInTable = True
                 attrTableName = "SAILORS"
+                attrTablePairs.append( (attr, attrTableName) )
                 break
         for item in boats:
             if (item[0].upper() == attr or attr == "*"):
                 isInTable = True
                 attrTableName = "BOATS"
+                attrTablePairs.append( (attr, attrTableName) )
                 break
         for item in reserves:
             if (item[0].upper() == attr or attr == "*"):
                 isInTable = True
                 attrTableName = "RESERVES"
+                attrTablePairs.append( (attr, attrTableName) )
                 break
         if (isInTable == False):
             print(attr + " is not an attribute in the schema.")
             # Do something since an attribute is invalid
-        else:
-            print(attr + " is in the table " + attrTableName)
-            # Build list of attr, table pairs
-            attrTablePairs.append((attr, attrTableName))
+
+    #TODO remove this print
+    for pair in attrTablePairs:
+        print(pair)
 
     # Check to see if the corresponding table is being used in the query
+    attrUsed = []
     for pair in attrTablePairs:
         beingUsed = False
         if (pair[0] == "*"):
             beingUsed = True
+            attrUsed.append( pair[0] )
         for table in tables:
+            print("Table: " + table[0])
             if (pair[1] == str(table[0].upper())):
                 beingUsed = True
+                attrUsed.append( pair[0] )
                 break
-        if (beingUsed == False):
+        if (beingUsed == False and pair[0] not in attrUsed):
             # Attribute is invalid as the table it belongs to is not being used in the query
             print(str(pair[0]) + " is invalid as the table it belongs to (" + str(
                 pair[1]) + ") is not being used in the query.")
