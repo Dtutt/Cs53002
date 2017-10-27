@@ -91,7 +91,7 @@ def sqlparse(sql):
 
     # List of tables being used
     tables = parsedQuery[3]
-    tables_rename = []
+    tables_rename = ["SAILORS", "BOATS", "RESERVES"]
     # List of attributes being used in select
     attributes = parsedQuery[1]
 
@@ -193,6 +193,9 @@ def sqlparse(sql):
             print(str(pair[0]) + " is invalid as the table it belongs to (" + str(
                 pair[1]) + ") is not being used in the query.")
 
+    tables_used = []
+    for table in tables:
+        tables_used.append( table[0] )
     # Check if the attributes being used in the WHERE stmnt are valid
     # - Check if WHERE stmnt exists
     if (len(parsedQuery) >= 5):
@@ -249,7 +252,6 @@ def sqlparse(sql):
                     else:
                         # Check if the attribute is valid
                         valid = False
-
                         for item in sailors:
                             if (item[0].upper() == str(exp[0].upper())):
                                 valid = True
