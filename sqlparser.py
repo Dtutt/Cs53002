@@ -60,6 +60,7 @@ def sqlparse(sql):
         (columnName + binop + columnRval) |
         (columnName + in_ + "(" + delimitedList(columnRval) + ")") |
         (columnName + in_ + "(" + selectStmt + ")") |
+        (columnName + binop + "(" + selectStmt + ")") |
         ("(" + whereExpression + ")")
     )
     whereExpression << whereCondition + Optional(Group(GROUP_BY + columnName + Optional(
@@ -69,12 +70,12 @@ def sqlparse(sql):
 
     # Define the SQL grammar
     selectStmt <<= (SELECT + ('*' | Group(delimitedList(Group((funcs | columnName) + Optional(AS + ident)))))("columns") + \
-                    FROM + Group(delimitedList(Group(tableName + Optional(AS + ident))))("tables") + \
+                    FROM + Group(delimitedList(Group(tableName + Optional(AS + ident))))("tables") + Optional((CONTAINS + "(" + selectStmt + ")")("contains")) + \
                     Optional(Group(WHERE + whereExpression), "")("where")) + \
                    Optional((UNION + selectStmt)("union") | (INTERSECT + selectStmt)("intersect") | (EXCEPT + selectStmt)(
-                       "except") | (CONTAINS + selectStmt)("contains"))
+                       "except"))
 
-    SQLParser = selectStmt  # TODO - make paranthesies optional around a selectStmt (test h)
+    SQLParser = selectStmt
 
     # Begin validation
     try:
@@ -172,10 +173,6 @@ def sqlparse(sql):
             print(attr + " is not an attribute in the schema.")
             # Do something since an attribute is invalid
 
-    #TODO remove this print
-    for pair in attrTablePairs:
-        print(pair)
-
     # Check to see if the corresponding table is being used in the query
     attrUsed = []
     for pair in attrTablePairs:
@@ -204,66 +201,109 @@ def sqlparse(sql):
             if (exp != "WHERE" and exp != "AND" and exp != "OR"):
                 if (exp[0] == "GROUP BY"):
                     valid = False
-                    for attr in attrTablePairs:
-                        if (str(exp[1]).upper() == str(attr[0]).upper()):
-                            valid = True
-                            break
+                    myAttr = str(exp[1]).upper()
+                    if ( "." in myAttr ):
+                            myTableRename = myAttr.split(".")[0]
+                            myAttr = myAttr.split(".")[1]
+                            # Check if the table rename is valid
+                            if (myTableRename not in tables_rename):
+                                print(myTableRename + " is not a valid table name")
+                    for table in tables_used:
+                            if (table == "SAILORS"):
+                                # Check if attr is in sailors
+                                for item in sailors:
+                                    if ( myAttr in str(item[0]).upper() ):
+                                        valid = True
+                            if (table == "RESERVES"):
+                                # Check if attr is in reserves
+                                for item in reserves:
+                                    if ( myAttr in str(item[0]).upper() ):
+                                        valid = True
+                            if (table == "BOATS"):
+                                # Check if attr is in reserves
+                                for item in boats:
+                                    if ( myAttr in str(item[0]).upper() ):
+                                        valid = True
                     if (valid == False):
                         print(exp[1] + " in the group by clause is not a valid attribute")
-                    if (len(exp) >= 3):
-                        if (str(exp[2]).upper() == "HAVING"):
-                            print("")
                 else:
                     if (exp[0] == "COUNT" or exp[0] == "MAX" or exp[0] == "AVG" or exp[0] == "SUM"):
                         # Check if the attribute is valid
+                        myAttr = str(exp[2]).upper()
+                        if ( "." in myAttr ):
+                            myTableRename = myAttr.split(".")[0]
+                            myAttr = myAttr.split(".")[1]
+                            # Check if the table rename is valid
+                            if (myTableRename not in tables_rename):
+                                print(myTableRename + " is not a valid table name")
                         valid = False
-                        for item in sailors:
-                            if (item[0].upper() == str(exp[2]).upper()):
-                                valid = True
-                                break
-                        for item in boats:
-                            if (item[0].upper() == str(exp[2]).upper()):
-                                valid = True
-                                break
-                        for item in reserves:
-                            if (item[0].upper() == str(exp[2]).upper()):
-                                valid = True
-                                break
+                        
+                        for table in tables_used:
+                            if (table == "SAILORS"):
+                                # Check if attr is in sailors
+                                for item in sailors:
+                                    if ( myAttr in str(item[0]).upper() ):
+                                        valid = True
+                            if (table == "RESERVES"):
+                                # Check if attr is in reserves
+                                for item in reserves:
+                                    if ( myAttr in str(item[0]).upper() ):
+                                        valid = True
+                            if (table == "BOATS"):
+                                # Check if attr is in reserves
+                                for item in boats:
+                                    if ( myAttr in str(item[0]).upper() ):
+                                        valid = True
+
                         if (valid == False):
                             print(exp[2] + " in the where clause is not a valid attribute")
                     elif ("." in exp[0]):
                         # Check if the attribute is valid
                         valid = False
+                        myTableRename = exp[0].split(".")[0]
                         myAttr = exp[0].split(".")[1]
-                        for item in sailors:
-                            if (item[0].upper() == myAttr.upper()):
-                                valid = True
-                                break
-                        for item in boats:
-                            if (item[0].upper() == myAttr.upper()):
-                                valid = True
-                                break
-                        for item in reserves:
-                            if (item[0].upper() == myAttr.upper()):
-                                valid = True
-                                break
+                        
+                        for table in tables_used:
+                            if (table == "SAILORS"):
+                                # Check if attr is in sailors
+                                for item in sailors:
+                                    if ( myAttr in str(item[0]).upper() ):
+                                        valid = True
+                            if (table == "RESERVES"):
+                                # Check if attr is in reserves
+                                for item in reserves:
+                                    if ( myAttr in str(item[0]).upper() ):
+                                        valid = True
+                            if (table == "BOATS"):
+                                # Check if attr is in reserves
+                                for item in boats:
+                                    if ( myAttr in str(item[0]).upper() ):
+                                        valid = True
+                        # Check if the table rename is valid
+                        if (myTableRename not in tables_rename):
+                            print(myTableRename + " is not a valid table name")
                         if (valid == False):
                             print(exp[0] + " in the where clause is not a valid attribute")
                     else:
                         # Check if the attribute is valid
+                        # Go through tables being used, check if attribute belongs to one of them
                         valid = False
-                        for item in sailors:
-                            if (item[0].upper() == str(exp[0].upper())):
-                                valid = True
-                                break
-                        for item in boats:
-                            if (item[0].upper() == str(exp[0].upper())):
-                                valid = True
-                                break
-                        for item in reserves:
-                            if (item[0].upper() == str(exp[0].upper())):
-                                valid = True
-                                break
+                        for table in tables_used:
+                            if (table == "SAILORS"):
+                                # Check if attr is in sailors
+                                for item in sailors:
+                                    if ( exp[0] in str(item[0]).upper() ):
+                                        valid = True
+                            if (table == "RESERVES"):
+                                # Check if attr is in reserves
+                                for item in reserves:
+                                    if ( exp[0] in str(item[0]).upper() ):
+                                        valid = True
+                            if (table == "BOATS"):
+                                # Check if attr is in reserves
+                                for item in boats:
+                                    if ( exp[0] in str(item[0]).upper() ):
+                                        valid = True
                         if (valid == False):
                             print(exp[0] + " in the where clause is not a valid attribute")
 
