@@ -16,10 +16,10 @@ loop=True
 while loop:
     print("1. Run Query")
     print("2. End")
-    choice = input("enter number of option ")
+    choice = input("Enter selection: ")
     choice='1'
     if choice=='1':
-        SQL=input("Enter SQL query ")
+        SQL=input("Enter SQL query: ")
         print("\nRelational Algebra Expression")
         RAstr=sqlparser.sqlparse(SQL)
         print("\n\n Relational Algebra Tree")
