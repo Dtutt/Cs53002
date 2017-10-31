@@ -91,6 +91,7 @@ def sqlparse(sql):
         print(e)
 
     # List of tables being used
+
     tables = parsedQuery[3]
     tables_rename = ["SAILORS", "BOATS", "RESERVES"]
     # List of attributes being used in select
@@ -406,7 +407,6 @@ def sqlparse(sql):
                     Rastr = Rastr + 'x (Rename)[' + str(table[2]) + ']' + str(table[0])
 
         Rastr = Rastr + ']'
-        print(Rastr)
     except Exception as e:
         Rast=""
         print("Error:",e)

@@ -1,0 +1,323 @@
+C:\Users\Dtutt\AppData\Local\Programs\Python\Python36-32\python.exe "C:\Program Files\JetBrains\PyCharm 2017.2\helpers\pydev\pydevd.py" --multiproc --qt-support=auto --client 127.0.0.1 --port 64527 --file C:/Users/Dtutt/PycharmProjects/cs5300/Cs5300_p2/main.py
+pydev debugger: process 8664 is connecting
+
+Connected to pydev debugger (build 172.3317.103)
+Query A Results
+SQL Validating
+SELECT S.sname FROM Sailors AS S, Reserves AS R WHERE S.sid=R.sid AND R.bid=103
+
+-------------------------------------------
+ ['SELECT', [['S.SNAME']], 'FROM', [['SAILORS', 'AS', 'S'], ['RESERVES', 'AS', 'R']], ['WHERE', ['S.SID', '=', 'R.SID'], 'AND', ['R.BID', '=', '103']]]
+-------------------------------------------
+Error messages (if any):
+
+-------------------------------------------
+
+
+Relational Algebra Expression
+[(Projection)S.SNAME](Select)[S.SID = R.SID AND R.BID = 103 [(Rename)[S]SAILORSx (Rename)[R]RESERVES]
+
+
+ Relational Algebra Tree
+[(Projection)S.SNAME]
+└── (Select)
+    └── [S.SID = R.SID AND R.BID = 103 [(Rename)[S]SAILORSx (Rename)[R]RESERVES]
+
+
+
+
+Query B Results
+SQL Validating
+SELECT S.sname FROM Sailors AS S, Reserves AS R, Boats AS B WHERE S.sid=R.sid AND R.bid=B.bid AND B.color='red'
+
+-------------------------------------------
+ ['SELECT', [['S.SNAME']], 'FROM', [['SAILORS', 'AS', 'S'], ['RESERVES', 'AS', 'R'], ['BOATS', 'AS', 'B']], ['WHERE', ['S.SID', '=', 'R.SID'], 'AND', ['R.BID', '=', 'B.BID'], 'AND', ['B.COLOR', '=', "'red'"]]]
+-------------------------------------------
+Error messages (if any):
+
+-------------------------------------------
+
+
+Relational Algebra Expression
+[(Projection)S.SNAME](Select)[S.SID = R.SID AND R.BID = B.BID AND B.COLOR = 'red' [(Rename)[S]SAILORSx (Rename)[R]RESERVESx (Rename)[B]BOATS]
+
+
+ Relational Algebra Tree
+[(Projection)S.SNAME]
+└── (Select)
+    └── [S.SID = R.SID AND R.BID = B.BID AND B.COLOR = 'red' [(Rename)[S]SAILORSx (Rename)[R]RESERVESx (Rename)[B]BOATS]
+
+
+
+
+Query C Results
+SQL Validating
+SELECT sname FROM Sailors, Boats, Reserves WHERE Sailors.sid=Reserves.sid AND Reserves.bid=Boats.bid AND Boats.color='red' UNION SELECT sname FROM Sailors, Boats, Reserves WHERE Sailors.sid=Reserves.sid AND Reserves.bid=Boats.bid AND Boats.color='green'
+
+-------------------------------------------
+ ['SELECT', [['SNAME']], 'FROM', [['SAILORS'], ['BOATS'], ['RESERVES']], ['WHERE', ['SAILORS.SID', '=', 'RESERVES.SID'], 'AND', ['RESERVES.BID', '=', 'BOATS.BID'], 'AND', ['BOATS.COLOR', '=', "'red'"]], 'UNION', 'SELECT', [['SNAME']], 'FROM', [['SAILORS'], ['BOATS'], ['RESERVES']], ['WHERE', ['SAILORS.SID', '=', 'RESERVES.SID'], 'AND', ['RESERVES.BID', '=', 'BOATS.BID'], 'AND', ['BOATS.COLOR', '=', "'green'"]]]
+-------------------------------------------
+Error messages (if any):
+
+-------------------------------------------
+
+
+Relational Algebra Expression
+[(Projection)SNAME](Select)[SAILORS.SID = RESERVES.SID AND RESERVES.BID = BOATS.BID AND BOATS.COLOR = 'red' [SAILORS x BOATS x RESERVES]
+
+
+ Relational Algebra Tree
+[(Projection)SNAME]
+└── (Select)
+    └── [SAILORS.SID = RESERVES.SID AND RESERVES.BID = BOATS.BID AND BOATS.COLOR = 'red' [SAILORS x BOATS x RESERVES]
+
+
+
+
+Query D Results
+SQL Validating
+SELECT S.sname FROM Sailors AS S, Reserves AS R WHERE R.sid = S.sid AND R.bid = 100 AND R.rating > 5 AND R.day = '8/9/09'
+
+-------------------------------------------
+ ['SELECT', [['S.SNAME']], 'FROM', [['SAILORS', 'AS', 'S'], ['RESERVES', 'AS', 'R']], ['WHERE', ['R.SID', '=', 'S.SID'], 'AND', ['R.BID', '=', '100'], 'AND', ['R.RATING', '>', '5'], 'AND', ['R.DAY', '=', "'8/9/09'"]]]
+-------------------------------------------
+Error messages (if any):
+
+-------------------------------------------
+
+
+Relational Algebra Expression
+[(Projection)S.SNAME](Select)[R.SID = S.SID AND R.BID = 100 AND R.RATING > 5 AND R.DAY = '8/9/09' [(Rename)[S]SAILORSx (Rename)[R]RESERVES]
+
+
+ Relational Algebra Tree
+[(Projection)S.SNAME]
+└── (Select)
+    └── [R.SID = S.SID AND R.BID = 100 AND R.RATING > 5 AND R.DAY = '8/9/09' [(Rename)[S]SAILORSx (Rename)[R]RESERVES]
+
+
+
+
+Query E Results
+SQL Validating
+SELECT sname FROM Sailors, Boats, Reserves WHERE Sailors.sid=Reserves.sid AND Reserves.bid=Boats.bid AND Boats.color='red' INTERSECT SELECT sname FROM Sailors, Boats, Reserves WHERE Sailors.sid=Reserves.sid AND Reserves.bid=Boats.bid AND Boats.color='green'
+
+-------------------------------------------
+ ['SELECT', [['SNAME']], 'FROM', [['SAILORS'], ['BOATS'], ['RESERVES']], ['WHERE', ['SAILORS.SID', '=', 'RESERVES.SID'], 'AND', ['RESERVES.BID', '=', 'BOATS.BID'], 'AND', ['BOATS.COLOR', '=', "'red'"]], 'INTERSECT', 'SELECT', [['SNAME']], 'FROM', [['SAILORS'], ['BOATS'], ['RESERVES']], ['WHERE', ['SAILORS.SID', '=', 'RESERVES.SID'], 'AND', ['RESERVES.BID', '=', 'BOATS.BID'], 'AND', ['BOATS.COLOR', '=', "'green'"]]]
+-------------------------------------------
+Error messages (if any):
+
+-------------------------------------------
+
+
+Relational Algebra Expression
+[(Projection)SNAME](Select)[SAILORS.SID = RESERVES.SID AND RESERVES.BID = BOATS.BID AND BOATS.COLOR = 'red' [SAILORS x BOATS x RESERVES]
+
+
+ Relational Algebra Tree
+[(Projection)SNAME]
+└── (Select)
+    └── [SAILORS.SID = RESERVES.SID AND RESERVES.BID = BOATS.BID AND BOATS.COLOR = 'red' [SAILORS x BOATS x RESERVES]
+
+
+
+
+Query F Results
+SQL Validating
+SELECT S.sid FROM Sailors AS S, Reserves AS R, Boats AS B WHERE S.sid=R.sid AND R.bid=B.bid AND B.color='red' EXCEPT SELECT S2.sid FROM Sailors AS S2, Reserves AS R2, Boats AS B2 WHERE S2.sid=R2.sid AND R2.bid=B2.bid AND B.2color='green'
+
+-------------------------------------------
+ ['SELECT', [['S.SID']], 'FROM', [['SAILORS', 'AS', 'S'], ['RESERVES', 'AS', 'R'], ['BOATS', 'AS', 'B']], ['WHERE', ['S.SID', '=', 'R.SID'], 'AND', ['R.BID', '=', 'B.BID'], 'AND', ['B.COLOR', '=', "'red'"]], 'EXCEPT', 'SELECT', [['S2.SID']], 'FROM', [['SAILORS', 'AS', 'S2'], ['RESERVES', 'AS', 'R2'], ['BOATS', 'AS', 'B2']], ['WHERE', ['S2.SID', '=', 'R2.SID'], 'AND', ['R2.BID', '=', 'B2.BID']]]
+-------------------------------------------
+Error messages (if any):
+
+-------------------------------------------
+
+
+Relational Algebra Expression
+[(Projection)S.SID](Select)[S.SID = R.SID AND R.BID = B.BID AND B.COLOR = 'red' [(Rename)[S]SAILORSx (Rename)[R]RESERVESx (Rename)[B]BOATS]
+
+
+ Relational Algebra Tree
+[(Projection)S.SID]
+└── (Select)
+    └── [S.SID = R.SID AND R.BID = B.BID AND B.COLOR = 'red' [(Rename)[S]SAILORSx (Rename)[R]RESERVESx (Rename)[B]BOATS]
+
+
+
+
+Query G Results
+SQL Validating
+SELECT S.sname FROM Sailors AS S WHERE S.sid IN ( SELECT R.sid FROM Reserve AS R WHERE R.bid = 103)
+
+-------------------------------------------
+ ['SELECT', [['S.SNAME']], 'FROM', [['SAILORS', 'AS', 'S']], ['WHERE', ['S.SID', 'IN', '(', 'SELECT', [['R.SID']], 'FROM', [['RESERVE', 'AS', 'R']], ['WHERE', ['R.BID', '=', '103']], ')']]]
+-------------------------------------------
+Error messages (if any):
+
+-------------------------------------------
+
+
+Relational Algebra Expression
+[(Projection)S.SNAME](Select)[S.SID IN ( SELECT [['R.SID']] FROM [['RESERVE', 'AS', 'R']] ['WHERE', ['R.BID', '=', '103']] ) [(Rename)[S]SAILORS]
+
+
+ Relational Algebra Tree
+[(Projection)S.SNAME]
+└── (Select)
+    └── [S.SID IN ( SELECT [['R.SID']] FROM [['RESERVE', 'AS', 'R']] ['WHERE', ['R.BID', '=', '103']] ) [(Rename)[S]SAILORS]
+
+
+
+
+Query H Results
+SQL Validating
+SELECT S.sname FROM Sailors AS SWHERE S.sid IN ((SELECT R.sid FROM Reserve AS R, Boats AS B WHERE R.bid = B.bid AND B.color = 'red') INTERSECT (SELECT R2.sid FROM Reserve AS R2, Boats AS B2 WHERE R2.bid = B2.bid AND B2.color = 'green'))
+
+-------------------------------------------
+ ['SELECT', [['S.SNAME']], 'FROM', [['SAILORS', 'AS', 'SWHERE']], '']
+-------------------------------------------
+Error messages (if any):
+S is not a valid renamed table.
+
+-------------------------------------------
+
+
+Relational Algebra Expression
+[(Projection)S.SNAME][(Rename)[SWHERE]SAILORS]
+
+
+ Relational Algebra Tree
+[(Projection)S.SNAME]
+└── [(Rename)[SWHERE]SAILORS]
+
+
+
+
+Query I Results
+SQL Validating
+SELECT S.sname FROM Sailors AS S WHERE S.age > (SELECT MAX (S2.age) FROM Sailors S2  WHERE R.sid = S2.rating = 10)
+
+-------------------------------------------
+ ['SELECT', [['S.SNAME']], 'FROM', [['SAILORS', 'AS', 'S']], '']
+-------------------------------------------
+Error messages (if any):
+
+-------------------------------------------
+
+
+Relational Algebra Expression
+[(Projection)S.SNAME][(Rename)[S]SAILORS]
+
+
+ Relational Algebra Tree
+[(Projection)S.SNAME]
+└── [(Rename)[S]SAILORS]
+
+
+
+
+Query J Results
+SQL Validating
+SELECT B.bid, Count (*) AS reservationcount FROM Boats B, Reserves R WHERE R.bid=B.bid AND B.color = 'red' GROUP BY B.bid
+
+-------------------------------------------
+ ['SELECT', [['B.BID'], ['COUNT', '(', '*', ')', 'AS', 'reservationcount']], 'FROM', [['BOATS']], '']
+-------------------------------------------
+Error messages (if any):
+B is not a valid renamed table.
+
+-------------------------------------------
+
+
+Relational Algebra Expression
+(Rename)[*<-COUNT,][(Projection)B.BID,COUNT(*)][BOATS]
+
+
+ Relational Algebra Tree
+(Rename)
+└── [*<-COUNT,]
+    └── [(Projection)B.BID,COUNT(*)]
+        └── [BOATS]
+
+
+
+
+Query K Results
+SQL Validating
+SELECT B.bid, Count (*) AS reservationcount FROM Boats B, Reserves R WHERE R.bid=B.bid AND B.color = 'red' GROUP BY B.bid HAVING B.color = 'red'
+
+-------------------------------------------
+ ['SELECT', [['B.BID'], ['COUNT', '(', '*', ')', 'AS', 'reservationcount']], 'FROM', [['BOATS']], '']
+-------------------------------------------
+Error messages (if any):
+B is not a valid renamed table.
+
+-------------------------------------------
+
+
+Relational Algebra Expression
+(Rename)[*<-COUNT,][(Projection)B.BID,COUNT(*)][BOATS]
+
+
+ Relational Algebra Tree
+(Rename)
+└── [*<-COUNT,]
+    └── [(Projection)B.BID,COUNT(*)]
+        └── [BOATS]
+
+
+
+
+Query L Results
+SQL Validating
+SELECT Sname FROM Sailors WHERE Sailor.sid IN (SELECT Reserves.bid, Reserves.sid FROM Reserves CONTAINS (SLECT Boats.bid FROM Boats WHERE Boats.name = 'interlake') )
+
+-------------------------------------------
+ ['SELECT', [['SNAME']], 'FROM', [['SAILORS']], '']
+-------------------------------------------
+Error messages (if any):
+
+-------------------------------------------
+
+
+Relational Algebra Expression
+[(Projection)SNAME][SAILORS]
+
+
+ Relational Algebra Tree
+[(Projection)SNAME]
+└── [SAILORS]
+
+
+
+
+Query M Results
+SQL Validating
+SELECT S.rating, Avg (S.age) As average FROM Sailors S WHERE S.age > 18 GROUP BY S.rating HAVING Count (*) > 1
+
+-------------------------------------------
+ ['SELECT', [['S.RATING'], ['AVG', '(', 'S.AGE', ')', 'AS', 'average']], 'FROM', [['SAILORS']], '']
+-------------------------------------------
+Error messages (if any):
+S is not a valid renamed table.
+S is not a valid renamed table.
+
+-------------------------------------------
+
+
+Relational Algebra Expression
+(Rename)[S.AGE<-AVG,][(Projection)S.RATING,AVG(S.AGE)][SAILORS]
+
+
+ Relational Algebra Tree
+(Rename)
+└── [S.AGE<-AVG,]
+    └── [(Projection)S.RATING,AVG(S.AGE)]
+        └── [SAILORS]
+
+
+
+
+
+Process finished with exit code 0

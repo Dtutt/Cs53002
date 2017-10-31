@@ -12,20 +12,19 @@ import sqlparser
 import treeRA
 loop=True
 
-#control for program
-while loop:
-    print("1. Run Query")
-    print("2. End")
-    choice = input("Enter selection: ")
-    choice='1'
-    if choice=='1':
-        SQL=input("Enter SQL query: ")
-        print("\nRelational Algebra Expression")
-        RAstr=sqlparser.sqlparse(SQL)
-        print("\n\n Relational Algebra Tree")
-        treeRA.ratree(RAstr)
-        loop=False
-    elif choice=='2':
-        loop=False
+def validate(SQL):
+    RAstr=sqlparser.sqlparse(SQL)
+    print("\nRelational Algebra Expression")
+    print(RAstr)
+    print("\n\n Relational Algebra Tree")
+    treeRA.ratree(RAstr)
+
+with open('query.data') as f:
+    i=0
+    for line in f:
+        print('Query '+chr(ord('A')+i)+' Results')
+        validate(line)
+        print('\n\n\n')
+        i+=1
 
 
