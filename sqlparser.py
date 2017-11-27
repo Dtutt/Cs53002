@@ -28,6 +28,7 @@ def sqlparse(sql):
     AVG = Keyword("avg", caseless=True).addParseAction(upcaseTokens)
     SUM = Keyword("sum", caseless=True).addParseAction(upcaseTokens)
     S_ = Keyword("S", caseless=True).addParseAction(upcaseTokens)
+    S2_ = Keyword("S2", caseless=True).addParseAction(upcaseTokens)
     R_ = Keyword("R", caseless=True).addParseAction(upcaseTokens)
     B_ = Keyword("B", caseless=True).addParseAction(upcaseTokens)
 
@@ -68,7 +69,7 @@ def sqlparse(sql):
         (columnName + in_ + selectStmt) |
         (Optional(not_) + exists_ + "(" + delimitedList(columnRval) + ")") |
         (Optional(not_) + exists_ + selectStmt) |
-        (columnName + binop + "(" + selectStmt + ")") |
+        (columnName + binop + selectStmt) |
         ("(" + whereExpression + ")")
     )
     whereExpression << whereCondition + Optional(Group(GROUP_BY + columnName + Optional(
@@ -77,8 +78,8 @@ def sqlparse(sql):
         (and_ | or_) + whereExpression)
 
     # Define the SQL grammar
-    selectStmt <<= (Optional('(') + SELECT + ('*' | Group(delimitedList(Group((funcs | columnName) + Optional(S_ | R_ | B_) + Optional(AS + ident)))))("columns") + \
-                    FROM + Group(delimitedList(Group(tableName + Optional(S_ | R_ | B_) + Optional(AS + ident))))("tables") + Optional((CONTAINS + "(" + selectStmt + ")")("contains")) + \
+    selectStmt <<= (Optional('(') + SELECT + ('*' | Group(delimitedList(Group((funcs | columnName) + Optional(S_ | R_ | B_ | S2_) + Optional(AS + ident)))))("columns") + \
+                    FROM + Group(delimitedList(Group(tableName + Optional(S_ | R_ | B_ | S2_) + Optional(AS + ident))))("tables") + Optional((CONTAINS + "(" + selectStmt + ")")("contains")) + \
                     Optional(Group(WHERE + whereExpression), "")("where") + Optional(')')) + \
                    Optional((UNION + selectStmt)("union") | (INTERSECT + selectStmt)("intersect") | (EXCEPT + selectStmt)(
                        "except"))
@@ -424,5 +425,3 @@ def sqlparse(sql):
         Rast=""
         print("Error:",e)
     return Rastr
-
-sqlparse("SELECT S.sname FROM Sailors S WHERE NOT EXISTS (SELECT B.bid FROM Boats B WHERE NOT EXISTS (SELECT R.bid FROM Reserves R WHERE R.bid = B.bid AND R.sid = S.sid))")
