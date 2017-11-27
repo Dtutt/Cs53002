@@ -27,6 +27,10 @@ def sqlparse(sql):
     MAX = Keyword("max", caseless=True).addParseAction(upcaseTokens)
     AVG = Keyword("avg", caseless=True).addParseAction(upcaseTokens)
     SUM = Keyword("sum", caseless=True).addParseAction(upcaseTokens)
+    S_ = Keyword("S", caseless=True).addParseAction(upcaseTokens)
+    S2_ = Keyword("S2", caseless=True).addParseAction(upcaseTokens)
+    R_ = Keyword("R", caseless=True).addParseAction(upcaseTokens)
+    B_ = Keyword("B", caseless=True).addParseAction(upcaseTokens)
 
     ident = Word(alphas, alphanums + "_$").setName("identifier")
     columnName = (delimitedList(ident, ".", combine=True)).setName("column name").addParseAction(upcaseTokens)
@@ -38,9 +42,12 @@ def sqlparse(sql):
     funcs = ((COUNT | MAX | AVG | SUM) + "(" + ("*" | columnName) + ")")
 
     whereExpression = Forward()
+    space_ = Keyword(" ", caseless=True).addParseAction(upcaseTokens) 
     and_ = Keyword("and", caseless=True).addParseAction(upcaseTokens)
     or_ = Keyword("or", caseless=True).addParseAction(upcaseTokens)
     in_ = Keyword("in", caseless=True).addParseAction(upcaseTokens)
+    exists_ = Keyword("exists", caseless=True).addParseAction(upcaseTokens)
+    not_ = Keyword("not", caseless=True).addParseAction(upcaseTokens)
     GROUP_BY = Keyword("group by", caseless=True).addParseAction(upcaseTokens)
     HAVING = Keyword("having", caseless=True).addParseAction(upcaseTokens)
     CONTAINS = Keyword("contains", caseless=True).addParseAction(upcaseTokens)
@@ -59,8 +66,10 @@ def sqlparse(sql):
         (funcs + binop + columnRval) |
         (columnName + binop + columnRval) |
         (columnName + in_ + "(" + delimitedList(columnRval) + ")") |
-        (columnName + in_ + "(" + selectStmt + ")") |
-        (columnName + binop + "(" + selectStmt + ")") |
+        (columnName + in_ + selectStmt) |
+        (Optional(not_) + exists_ + "(" + delimitedList(columnRval) + ")") |
+        (Optional(not_) + exists_ + selectStmt) |
+        (columnName + binop + selectStmt) |
         ("(" + whereExpression + ")")
     )
     whereExpression << whereCondition + Optional(Group(GROUP_BY + columnName + Optional(
@@ -69,9 +78,9 @@ def sqlparse(sql):
         (and_ | or_) + whereExpression)
 
     # Define the SQL grammar
-    selectStmt <<= (SELECT + ('*' | Group(delimitedList(Group((funcs | columnName) + Optional(AS + ident)))))("columns") + \
-                    FROM + Group(delimitedList(Group(tableName + Optional(AS + ident))))("tables") + Optional((CONTAINS + "(" + selectStmt + ")")("contains")) + \
-                    Optional(Group(WHERE + whereExpression), "")("where")) + \
+    selectStmt <<= (Optional('(') + SELECT + ('*' | Group(delimitedList(Group((funcs | columnName) + Optional(S_ | R_ | B_ | S2_) + Optional(AS + ident)))))("columns") + \
+                    FROM + Group(delimitedList(Group(tableName + Optional(S_ | R_ | B_ | S2_) + Optional(AS + ident))))("tables") + Optional((CONTAINS + "(" + selectStmt + ")")("contains")) + \
+                    Optional(Group(WHERE + whereExpression), "")("where") + Optional(')')) + \
                    Optional((UNION + selectStmt)("union") | (INTERSECT + selectStmt)("intersect") | (EXCEPT + selectStmt)(
                        "except"))
 
@@ -128,6 +137,8 @@ def sqlparse(sql):
             # Check for renaming
             if ( len(item) > 2 ):
                 tables_rename.append( item[2].upper() )
+            elif ( len(item) > 1 ):
+                tables_rename.append( item[1].upper() )
 
 
     # Check if the select attributes are valid according to the schema and what tables are being used in the query
@@ -268,19 +279,20 @@ def sqlparse(sql):
                             if (table == "SAILORS"):
                                 # Check if attr is in sailors
                                 for item in sailors:
-                                    if ( myAttr in str(item[0]).upper() ):
+                                    if ( myAttr in str(item[0]).upper() and ( myTableRename == 'S' or myTableRename == "SAILORS") ):
                                         valid = True
                             if (table == "RESERVES"):
                                 # Check if attr is in reserves
                                 for item in reserves:
-                                    if ( myAttr in str(item[0]).upper() ):
+                                    if ( myAttr in str(item[0]).upper() and ( myTableRename == 'R' or myTableRename == "RESERVES") ):
                                         valid = True
                             if (table == "BOATS"):
                                 # Check if attr is in reserves
                                 for item in boats:
-                                    if ( myAttr in str(item[0]).upper() ):
+                                    if ( myAttr in str(item[0]).upper() and ( myTableRename == 'B'  or myTableRename == "BOATS" ) ):
                                         valid = True
                         # Check if the table rename is valid
+
                         if (myTableRename not in tables_rename):
                             print(myTableRename + " is not a valid table name")
                         if (valid == False):
@@ -305,6 +317,8 @@ def sqlparse(sql):
                                 for item in boats:
                                     if ( exp[0] in str(item[0]).upper() ):
                                         valid = True
+                        if ( exp[0] == "NOT" ):
+                            valid = True
                         if (valid == False):
                             print(exp[0] + " in the where clause is not a valid attribute")
 
@@ -411,4 +425,3 @@ def sqlparse(sql):
         Rast=""
         print("Error:",e)
     return Rastr
-
