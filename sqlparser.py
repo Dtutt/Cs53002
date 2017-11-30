@@ -66,7 +66,7 @@ def sqlparse(sql):
         (funcs + binop + columnRval) |
         (columnName + binop + columnRval) |
         (columnName + in_ + "(" + delimitedList(columnRval) + ")") |
-        (columnName + in_ + selectStmt) |
+        (columnName + in_ + Optional("(") + selectStmt + Optional(")")) |
         (Optional(not_) + exists_ + "(" + delimitedList(columnRval) + ")") |
         (Optional(not_) + exists_ + selectStmt) |
         (columnName + binop + selectStmt) |
