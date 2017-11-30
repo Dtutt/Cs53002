@@ -9,21 +9,13 @@
 
 # Imports
 import sqlparser
-import treeRA
+
 loop=True
-
-def validate(SQL):
-    RAstr=sqlparser.sqlparse(SQL)
-    print("\nRelational Algebra Expression")
-    print(RAstr)
-    print("\n\n Relational Algebra Tree")
-    treeRA.ratree(RAstr)
-
 with open('query.data') as f:
     i=0
     for line in f:
         print('Query '+chr(ord('A')+i)+' Results')
-        validate(line)
+        sqlparser.sqlparse(line)
         print('\n\n\n')
         i+=1
 

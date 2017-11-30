@@ -1,13 +1,10 @@
-C:\Users\Dtutt\AppData\Local\Programs\Python\Python36-32\python.exe "C:\Program Files\JetBrains\PyCharm 2017.2\helpers\pydev\pydevd.py" --multiproc --qt-support=auto --client 127.0.0.1 --port 64527 --file C:/Users/Dtutt/PycharmProjects/cs5300/Cs5300_p2/main.py
-pydev debugger: process 8664 is connecting
-
-Connected to pydev debugger (build 172.3317.103)
+C:\Users\Dtutt\AppData\Local\Programs\Python\Python36-32\python.exe C:/Users/Dtutt/PycharmProjects/Cs5300_p2/main.py
 Query A Results
 SQL Validating
-SELECT S.sname FROM Sailors AS S, Reserves AS R WHERE S.sid=R.sid AND R.bid=103
+SELECT S.sid, S.sname, S.rating, S.age FROM Sailors AS S WHERE S.rating > 7
 
 -------------------------------------------
- ['SELECT', [['S.SNAME']], 'FROM', [['SAILORS', 'AS', 'S'], ['RESERVES', 'AS', 'R']], ['WHERE', ['S.SID', '=', 'R.SID'], 'AND', ['R.BID', '=', '103']]]
+ ['SELECT', [['S.SID'], ['S.SNAME'], ['S.RATING'], ['S.AGE']], 'FROM', [['SAILORS', 'AS', 'S']], ['WHERE', ['S.RATING', '>', '7']]]
 -------------------------------------------
 Error messages (if any):
 
@@ -15,23 +12,36 @@ Error messages (if any):
 
 
 Relational Algebra Expression
-[(Projection)S.SNAME](Select)[S.SID = R.SID AND R.BID = 103 [(Rename)[S]SAILORSx (Rename)[R]RESERVES]
+[(Projection)S.SID,S.SNAME,S.RATING,S.AGE](Select)[S.RATING > 7 [(Rename)[S]SAILORS]
 
 
  Relational Algebra Tree
-[(Projection)S.SNAME]
+[(Projection)S.SID,S.SNAME,S.RATING,S.AGE]
 └── (Select)
-    └── [S.SID = R.SID AND R.BID = 103 [(Rename)[S]SAILORSx (Rename)[R]RESERVES]
+    └── [S.RATING > 7 [(Rename)[S]SAILORS]
 
 
 
 
 Query B Results
 SQL Validating
-SELECT S.sname FROM Sailors AS S, Reserves AS R, Boats AS B WHERE S.sid=R.sid AND R.bid=B.bid AND B.color='red'
+SELECT S.sid, S.sname FROM Sailors AS S WHERE S.color = 'green'
 
 -------------------------------------------
- ['SELECT', [['S.SNAME']], 'FROM', [['SAILORS', 'AS', 'S'], ['RESERVES', 'AS', 'R'], ['BOATS', 'AS', 'B']], ['WHERE', ['S.SID', '=', 'R.SID'], 'AND', ['R.BID', '=', 'B.BID'], 'AND', ['B.COLOR', '=', "'red'"]]]
+ ['SELECT', [['S.SID'], ['S.SNAME']], 'FROM', [['SAILORS', 'AS', 'S']], ['WHERE', ['S.COLOR', '=', "'green'"]]]
+-------------------------------------------
+Error messages (if any):
+S.COLOR in the where clause is not a valid attribute
+
+
+
+
+Query C Results
+SQL Validating
+SELECT B.color FROM Sailors AS S, Reserves AS R, Boats AS B WHERE S.sid=R.sid AND R.bid=B.bid AND S.sname = 'Lubber'
+
+-------------------------------------------
+ ['SELECT', [['B.COLOR']], 'FROM', [['SAILORS', 'AS', 'S'], ['RESERVES', 'AS', 'R'], ['BOATS', 'AS', 'B']], ['WHERE', ['S.SID', '=', 'R.SID'], 'AND', ['R.BID', '=', 'B.BID'], 'AND', ['S.SNAME', '=', "'Lubber'"]]]
 -------------------------------------------
 Error messages (if any):
 
@@ -39,18 +49,18 @@ Error messages (if any):
 
 
 Relational Algebra Expression
-[(Projection)S.SNAME](Select)[S.SID = R.SID AND R.BID = B.BID AND B.COLOR = 'red' [(Rename)[S]SAILORSx (Rename)[R]RESERVESx (Rename)[B]BOATS]
+[(Projection)B.COLOR](Select)[S.SID = R.SID AND R.BID = B.BID AND S.SNAME = 'Lubber' [(Rename)[S]SAILORSx (Rename)[R]RESERVESx (Rename)[B]BOATS]
 
 
  Relational Algebra Tree
-[(Projection)S.SNAME]
+[(Projection)B.COLOR]
 └── (Select)
-    └── [S.SID = R.SID AND R.BID = B.BID AND B.COLOR = 'red' [(Rename)[S]SAILORSx (Rename)[R]RESERVESx (Rename)[B]BOATS]
+    └── [S.SID = R.SID AND R.BID = B.BID AND S.SNAME = 'Lubber' [(Rename)[S]SAILORSx (Rename)[R]RESERVESx (Rename)[B]BOATS]
 
 
 
 
-Query C Results
+Query D Results
 SQL Validating
 SELECT sname FROM Sailors, Boats, Reserves WHERE Sailors.sid=Reserves.sid AND Reserves.bid=Boats.bid AND Boats.color='red' UNION SELECT sname FROM Sailors, Boats, Reserves WHERE Sailors.sid=Reserves.sid AND Reserves.bid=Boats.bid AND Boats.color='green'
 
@@ -74,7 +84,7 @@ Relational Algebra Expression
 
 
 
-Query D Results
+Query E Results
 SQL Validating
 SELECT S.sname FROM Sailors AS S, Reserves AS R WHERE R.sid = S.sid AND R.bid = 100 AND R.rating > 5 AND R.day = '8/9/09'
 
@@ -82,23 +92,12 @@ SELECT S.sname FROM Sailors AS S, Reserves AS R WHERE R.sid = S.sid AND R.bid = 
  ['SELECT', [['S.SNAME']], 'FROM', [['SAILORS', 'AS', 'S'], ['RESERVES', 'AS', 'R']], ['WHERE', ['R.SID', '=', 'S.SID'], 'AND', ['R.BID', '=', '100'], 'AND', ['R.RATING', '>', '5'], 'AND', ['R.DAY', '=', "'8/9/09'"]]]
 -------------------------------------------
 Error messages (if any):
-
--------------------------------------------
-
-
-Relational Algebra Expression
-[(Projection)S.SNAME](Select)[R.SID = S.SID AND R.BID = 100 AND R.RATING > 5 AND R.DAY = '8/9/09' [(Rename)[S]SAILORSx (Rename)[R]RESERVES]
-
-
- Relational Algebra Tree
-[(Projection)S.SNAME]
-└── (Select)
-    └── [R.SID = S.SID AND R.BID = 100 AND R.RATING > 5 AND R.DAY = '8/9/09' [(Rename)[S]SAILORSx (Rename)[R]RESERVES]
+R.RATING in the where clause is not a valid attribute
 
 
 
 
-Query E Results
+Query F Results
 SQL Validating
 SELECT sname FROM Sailors, Boats, Reserves WHERE Sailors.sid=Reserves.sid AND Reserves.bid=Boats.bid AND Boats.color='red' INTERSECT SELECT sname FROM Sailors, Boats, Reserves WHERE Sailors.sid=Reserves.sid AND Reserves.bid=Boats.bid AND Boats.color='green'
 
@@ -122,12 +121,12 @@ Relational Algebra Expression
 
 
 
-Query F Results
+Query G Results
 SQL Validating
-SELECT S.sid FROM Sailors AS S, Reserves AS R, Boats AS B WHERE S.sid=R.sid AND R.bid=B.bid AND B.color='red' EXCEPT SELECT S2.sid FROM Sailors AS S2, Reserves AS R2, Boats AS B2 WHERE S2.sid=R2.sid AND R2.bid=B2.bid AND B.2color='green'
+SELECT S.sid FROM Sailors AS S, Reserves AS R, Boats AS B WHERE S.sid=R.sid AND R.bid=B.bid AND B.color='red' EXCEPT SELECT S2.sid FROM Sailors AS S2, Reserves AS R2, Boats AS B2 WHERE S2.sid=R2.sid AND R2.bid=B2.bid AND B2.color='green'
 
 -------------------------------------------
- ['SELECT', [['S.SID']], 'FROM', [['SAILORS', 'AS', 'S'], ['RESERVES', 'AS', 'R'], ['BOATS', 'AS', 'B']], ['WHERE', ['S.SID', '=', 'R.SID'], 'AND', ['R.BID', '=', 'B.BID'], 'AND', ['B.COLOR', '=', "'red'"]], 'EXCEPT', 'SELECT', [['S2.SID']], 'FROM', [['SAILORS', 'AS', 'S2'], ['RESERVES', 'AS', 'R2'], ['BOATS', 'AS', 'B2']], ['WHERE', ['S2.SID', '=', 'R2.SID'], 'AND', ['R2.BID', '=', 'B2.BID']]]
+ ['SELECT', [['S.SID']], 'FROM', [['SAILORS', 'AS', 'S'], ['RESERVES', 'AS', 'R'], ['BOATS', 'AS', 'B']], ['WHERE', ['S.SID', '=', 'R.SID'], 'AND', ['R.BID', '=', 'B.BID'], 'AND', ['B.COLOR', '=', "'red'"]], 'EXCEPT', 'SELECT', [['S2.SID']], 'FROM', [['SAILORS', 'AS', 'S2'], ['RESERVES', 'AS', 'R2'], ['BOATS', 'AS', 'B2']], ['WHERE', ['S2.SID', '=', 'R2.SID'], 'AND', ['R2.BID', '=', 'B2.BID'], 'AND', ['B2.COLOR', '=', "'green'"]]]
 -------------------------------------------
 Error messages (if any):
 
@@ -146,12 +145,12 @@ Relational Algebra Expression
 
 
 
-Query G Results
+Query H Results
 SQL Validating
-SELECT S.sname FROM Sailors AS S WHERE S.sid IN ( SELECT R.sid FROM Reserve AS R WHERE R.bid = 103)
+SELECT S.sname FROM Sailors AS S WHERE S.sid IN ( SELECT R.sid FROM Reserves AS R WHERE R.bid = 103)
 
 -------------------------------------------
- ['SELECT', [['S.SNAME']], 'FROM', [['SAILORS', 'AS', 'S']], ['WHERE', ['S.SID', 'IN', '(', 'SELECT', [['R.SID']], 'FROM', [['RESERVE', 'AS', 'R']], ['WHERE', ['R.BID', '=', '103']], ')']]]
+ ['SELECT', [['S.SNAME']], 'FROM', [['SAILORS', 'AS', 'S']], ['WHERE', ['S.SID', 'IN', '(', 'SELECT', [['R.SID']], 'FROM', [['RESERVES', 'AS', 'R']], ['WHERE', ['R.BID', '=', '103']], ')']]]
 -------------------------------------------
 Error messages (if any):
 
@@ -159,44 +158,20 @@ Error messages (if any):
 
 
 Relational Algebra Expression
-[(Projection)S.SNAME](Select)[S.SID IN ( SELECT [['R.SID']] FROM [['RESERVE', 'AS', 'R']] ['WHERE', ['R.BID', '=', '103']] ) [(Rename)[S]SAILORS]
+[(Projection)S.SNAME](Select)[S.SID IN ( SELECT [['R.SID']] FROM [['RESERVES', 'AS', 'R']] ['WHERE', ['R.BID', '=', '103']] ) [(Rename)[S]SAILORS]
 
 
  Relational Algebra Tree
 [(Projection)S.SNAME]
 └── (Select)
-    └── [S.SID IN ( SELECT [['R.SID']] FROM [['RESERVE', 'AS', 'R']] ['WHERE', ['R.BID', '=', '103']] ) [(Rename)[S]SAILORS]
-
-
-
-
-Query H Results
-SQL Validating
-SELECT S.sname FROM Sailors AS SWHERE S.sid IN ((SELECT R.sid FROM Reserve AS R, Boats AS B WHERE R.bid = B.bid AND B.color = 'red') INTERSECT (SELECT R2.sid FROM Reserve AS R2, Boats AS B2 WHERE R2.bid = B2.bid AND B2.color = 'green'))
-
--------------------------------------------
- ['SELECT', [['S.SNAME']], 'FROM', [['SAILORS', 'AS', 'SWHERE']], '']
--------------------------------------------
-Error messages (if any):
-S is not a valid renamed table.
-
--------------------------------------------
-
-
-Relational Algebra Expression
-[(Projection)S.SNAME][(Rename)[SWHERE]SAILORS]
-
-
- Relational Algebra Tree
-[(Projection)S.SNAME]
-└── [(Rename)[SWHERE]SAILORS]
+    └── [S.SID IN ( SELECT [['R.SID']] FROM [['RESERVES', 'AS', 'R']] ['WHERE', ['R.BID', '=', '103']] ) [(Rename)[S]SAILORS]
 
 
 
 
 Query I Results
 SQL Validating
-SELECT S.sname FROM Sailors AS S WHERE S.age > (SELECT MAX (S2.age) FROM Sailors S2  WHERE R.sid = S2.rating = 10)
+SELECT S.sname FROM Sailors AS S WHERE S.sid IN ((SELECT R.sid FROM Reserves AS R, Boats AS B WHERE R.bid = B.bid AND B.color = 'red') INTERSECT (SELECT R2.sid FROM Reserve AS R2, Boats AS B2 WHERE R2.bid = B2.bid AND B2.color = 'green'))
 
 -------------------------------------------
  ['SELECT', [['S.SNAME']], 'FROM', [['SAILORS', 'AS', 'S']], '']
@@ -219,102 +194,145 @@ Relational Algebra Expression
 
 Query J Results
 SQL Validating
-SELECT B.bid, Count (*) AS reservationcount FROM Boats B, Reserves R WHERE R.bid=B.bid AND B.color = 'red' GROUP BY B.bid
+SELECT S.sname FROM Sailors S WHERE NOT EXISTS (SELECT B.bid FROM Boats B WHERE NOT EXISTS (SELECT R.bid FROM Reserves R WHERE R.bid = B.bid AND R.sid = S.sid))
 
 -------------------------------------------
- ['SELECT', [['B.BID'], ['COUNT', '(', '*', ')', 'AS', 'reservationcount']], 'FROM', [['BOATS']], '']
+ ['SELECT', [['S.SNAME']], 'FROM', [['SAILORS', 'S']], ['WHERE', ['NOT', 'EXISTS', '(', 'SELECT', [['B.BID']], 'FROM', [['BOATS', 'B']], ['WHERE', ['NOT', 'EXISTS', '(', 'SELECT', [['R.BID']], 'FROM', [['RESERVES', 'R']], ['WHERE', ['R.BID', '=', 'B.BID'], 'AND', ['R.SID', '=', 'S.SID']], ')']], ')']]]
 -------------------------------------------
 Error messages (if any):
-B is not a valid renamed table.
 
 -------------------------------------------
 
+Error: list index out of range
 
 Relational Algebra Expression
-(Rename)[*<-COUNT,][(Projection)B.BID,COUNT(*)][BOATS]
+[(Projection)S.SNAME](Select)[NOT EXISTS ( SELECT [['B.BID']] FROM [['BOATS', 'B']] ['WHERE', ['NOT', 'EXISTS', '(', 'SELECT', [['R.BID']], 'FROM', [['RESERVES', 'R']], ['WHERE', ['R.BID', '=', 'B.BID'], 'AND', ['R.SID', '=', 'S.SID']], ')']] ) [
 
 
  Relational Algebra Tree
-(Rename)
-└── [*<-COUNT,]
-    └── [(Projection)B.BID,COUNT(*)]
-        └── [BOATS]
+[(Projection)S.SNAME]
+└── (Select)
+    └── [NOT EXISTS ( SELECT [['B.BID']] FROM [['BOATS', 'B']] ['WHERE', ['NOT', 'EXISTS', '(', 'SELECT', [['R.BID']], 'FROM', [['RESERVES', 'R']], ['WHERE', ['R.BID', '=', 'B.BID'], 'AND', ['R.SID', '=', 'S.SID']], ')']] ) [
 
 
 
 
 Query K Results
 SQL Validating
-SELECT B.bid, Count (*) AS reservationcount FROM Boats B, Reserves R WHERE R.bid=B.bid AND B.color = 'red' GROUP BY B.bid HAVING B.color = 'red'
+SELECT S.sname FROM Sailors S WHERE S.age > (SELECT MAX (S2.age) FROM Sailors S2 WHERE S2.rating = 10)
 
 -------------------------------------------
- ['SELECT', [['B.BID'], ['COUNT', '(', '*', ')', 'AS', 'reservationcount']], 'FROM', [['BOATS']], '']
+ ['SELECT', [['S.SNAME']], 'FROM', [['SAILORS', 'S']], ['WHERE', ['S.AGE', '>', '(', 'SELECT', [['MAX', '(', 'S2.AGE', ')']], 'FROM', [['SAILORS', 'S2']], ['WHERE', ['S2.RATING', '=', '10']], ')']]]
 -------------------------------------------
 Error messages (if any):
-B is not a valid renamed table.
 
 -------------------------------------------
 
+Error: list index out of range
 
 Relational Algebra Expression
-(Rename)[*<-COUNT,][(Projection)B.BID,COUNT(*)][BOATS]
+[(Projection)S.SNAME](Select)[S.AGE > ( SELECT [['MAX', '(', 'S2.AGE', ')']] FROM [['SAILORS', 'S2']] ['WHERE', ['S2.RATING', '=', '10']] ) [
 
 
  Relational Algebra Tree
-(Rename)
-└── [*<-COUNT,]
-    └── [(Projection)B.BID,COUNT(*)]
-        └── [BOATS]
+[(Projection)S.SNAME]
+└── (Select)
+    └── [S.AGE > ( SELECT [['MAX', '(', 'S2.AGE', ')']] FROM [['SAILORS', 'S2']] ['WHERE', ['S2.RATING', '=', '10']] ) [
 
 
 
 
 Query L Results
 SQL Validating
-SELECT Sname FROM Sailors WHERE Sailor.sid IN (SELECT Reserves.bid, Reserves.sid FROM Reserves CONTAINS (SLECT Boats.bid FROM Boats WHERE Boats.name = 'interlake') )
+SELECT B.bid, Count (*) AS reservationcount FROM Boats B, Reserves R WHERE R.bid=B.bid AND B.color = 'red' GROUP BY B.bid
 
 -------------------------------------------
- ['SELECT', [['SNAME']], 'FROM', [['SAILORS']], '']
+ ['SELECT', [['B.BID'], ['COUNT', '(', '*', ')', 'AS', 'reservationcount']], 'FROM', [['BOATS', 'B'], ['RESERVES', 'R']], ['WHERE', ['R.BID', '=', 'B.BID'], 'AND', ['B.COLOR', '=', "'red'"], ['GROUP BY', 'B.BID']]]
 -------------------------------------------
 Error messages (if any):
 
 -------------------------------------------
 
+Error: list index out of range
 
 Relational Algebra Expression
-[(Projection)SNAME][SAILORS]
+(Rename)[*<-COUNT,][(Projection)B.BID,COUNT(*)](Select)[R.BID = B.BID AND B.COLOR = 'red' GROUP BY(B.BID) )[
 
 
  Relational Algebra Tree
-[(Projection)SNAME]
-└── [SAILORS]
+(Rename)
+└── [*<-COUNT,]
+    └── [(Projection)B.BID,COUNT(*)]
+        └── (Select)
+            └── [R.BID = B.BID AND B.COLOR = 'red' GROUP BY(B.BID) )[
 
 
 
 
 Query M Results
 SQL Validating
+SELECT B.bid, Count (*) AS reservationcount FROM Boats B, Reserves R WHERE R.bid=B.bid AND B.color = 'red' GROUP BY B.bid HAVING B.color = 'red'
+
+-------------------------------------------
+ ['SELECT', [['B.BID'], ['COUNT', '(', '*', ')', 'AS', 'reservationcount']], 'FROM', [['BOATS', 'B'], ['RESERVES', 'R']], ['WHERE', ['R.BID', '=', 'B.BID'], 'AND', ['B.COLOR', '=', "'red'"], ['GROUP BY', 'B.BID', 'HAVING', ['B.COLOR', '=', "'red'"]]]]
+-------------------------------------------
+Error messages (if any):
+
+-------------------------------------------
+
+Error: list index out of range
+
+Relational Algebra Expression
+(Rename)[*<-COUNT,][(Projection)B.BID,COUNT(*)](Select)[R.BID = B.BID AND B.COLOR = 'red' GROUP BY(B.BID) HAVING(['B.COLOR', '=', "'red'"]) )[
+
+
+ Relational Algebra Tree
+(Rename)
+└── [*<-COUNT,]
+    └── [(Projection)B.BID,COUNT(*)]
+        └── (Select)
+            └── [R.BID = B.BID AND B.COLOR = 'red' GROUP BY(B.BID) HAVING(['B.COLOR', '=', "'red'"]) )[
+
+
+
+
+Query N Results
+SQL Validating
+SELECT Sname FROM Sailors WHERE Sailor.sid IN (SELECT Reserves.bid, Reserves.sid FROM Reserves CONTAINS (SELECT Boats.bid FROM Boats WHERE bname = 'interlake') )
+
+-------------------------------------------
+ ['SELECT', [['SNAME']], 'FROM', [['SAILORS']], ['WHERE', ['SAILOR.SID', 'IN', '(', 'SELECT', [['RESERVES.BID'], ['RESERVES.SID']], 'FROM', [['RESERVES']], 'CONTAINS', '(', 'SELECT', [['BOATS.BID']], 'FROM', [['BOATS']], ['WHERE', ['BNAME', '=', "'interlake'"]], ')', ')', '']]]
+-------------------------------------------
+Error messages (if any):
+SAILOR is not a valid table name
+SAILOR.SID in the where clause is not a valid attribute
+
+
+
+
+Query O Results
+SQL Validating
 SELECT S.rating, Avg (S.age) As average FROM Sailors S WHERE S.age > 18 GROUP BY S.rating HAVING Count (*) > 1
 
 -------------------------------------------
- ['SELECT', [['S.RATING'], ['AVG', '(', 'S.AGE', ')', 'AS', 'average']], 'FROM', [['SAILORS']], '']
+ ['SELECT', [['S.RATING'], ['AVG', '(', 'S.AGE', ')', 'AS', 'average']], 'FROM', [['SAILORS', 'S']], ['WHERE', ['S.AGE', '>', '18'], ['GROUP BY', 'S.RATING', 'HAVING', ['COUNT', '(', '*', ')', '>', '1']]]]
 -------------------------------------------
 Error messages (if any):
-S is not a valid renamed table.
-S is not a valid renamed table.
 
 -------------------------------------------
 
+Error: list index out of range
 
 Relational Algebra Expression
-(Rename)[S.AGE<-AVG,][(Projection)S.RATING,AVG(S.AGE)][SAILORS]
+(Rename)[S.AGE<-AVG,][(Projection)S.RATING,AVG(S.AGE)](Select)[S.AGE > 18 GROUP BY(S.RATING) HAVING(COUNT(*)=1 )[
 
 
  Relational Algebra Tree
 (Rename)
 └── [S.AGE<-AVG,]
     └── [(Projection)S.RATING,AVG(S.AGE)]
-        └── [SAILORS]
+        └── (Select)
+            └── [S.AGE > 18 GROUP BY(S.RATING) HAVING(COUNT(*)=1 )[
 
 
 

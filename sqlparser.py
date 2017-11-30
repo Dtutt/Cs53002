@@ -8,9 +8,327 @@
 #
 
 # Imports
+from anytree import Node, RenderTree
+
 from pyparsing import Literal, CaselessLiteral, Word, delimitedList, Optional, \
     Combine, Group, alphas, nums, alphanums, ParseException, Forward, oneOf, quotedString, \
     ZeroOrMore, restOfLine, Keyword, upcaseTokens
+
+def printtree(root):
+    print("\nQuery Tree\n")
+    for pre, fill, node in RenderTree(root):
+        print("%s%s" % (pre, node.name))
+    return
+
+def optimizeTree(root,ftable,whereN):
+    temp1=root
+    temp2=ftable
+    temp3=whereN
+    optmize=[]
+    fvar=[]
+    keywords=["AS", "AND", "IN", "GROUP BY" ]
+    open=False
+    Ostring=""
+    poss=False
+    possibleO=[]
+    found=[]
+    for node in ftable:
+        temp=node.name.replace('{RENAME}[','')
+        possibleO.append(temp.replace(']','.'))
+    temp=whereN.name.replace('{Select}','')
+
+    for word in temp.split():
+        if poss==False:
+            for name in possibleO:
+                if name in word:
+                    poss=True
+                    word.replace('[','')
+                    word.replace(']','')
+                    Ostring+=word+" "
+                    tempf='{RENAME}['+name.replace('.','')+']'
+                if word in keywords:
+                    Ostring = ""
+                    poss = False
+        else:
+            for name in possibleO:
+                if name in word:
+                    poss=False
+                    Ostring=""
+            if word[0]=="\'" and word[-1]=="\'":
+                open=True
+                Ostring+=word+" "
+                found.append(Ostring)
+                fvar.append(tempf)
+                tempf=""
+                poss=False
+            elif word in keywords:
+                Ostring=""
+                poss=False
+            else:
+                Ostring+=word+" "
+    if found.__len__()>0:
+        for item in found:
+            whereN.name=whereN.name.replace(item,'')
+        if whereN.name.split()[-2] =='AND':
+            temp=whereN.name
+            whereN.name=temp.replace(" AND ]",']')
+        for node in ftable:
+            counter=0
+            for var in fvar:
+                if var in node.name:
+                    optmize.append(Node(found[counter],node.parent))
+                    node.parent=optmize[counter]
+                    counter+=1
+        printtree(root)
+
+
+    return root
+
+def parseQsql(columns,whereExp,tables):
+    # RELATIONAL ALGEBRA TRANSLATION
+    Aggfunc = ['COUNT', 'MAX', 'MAX', 'AVG', 'SUM']
+    Aggfunc2 = ['GROUP BY', "HAVING"]
+    # SELECT conversion
+    # Create Regular Expression string
+    Rastr = '{Projection}['
+
+    # first element of section
+    first = True
+    rename = False
+    # SELECT conversion
+    try:
+        for column in columns:
+            if first:
+                if str(column[0]) in Aggfunc:
+                    Rastr = Rastr + str(column[column.__len__()-1])
+                else:
+                    Rastr = Rastr + str(column[0])
+                first = False
+            else:
+                if str(column[0]) in Aggfunc:
+                    Rastr = Rastr +','+ str(column[column.__len__() - 1])
+                else:
+                    Rastr = Rastr + ',' + str(column[0])
+
+            # Rename Set
+            found=False
+            if column.__len__() > 1:
+                if 'AS' in str(column):
+                    for item in (column):
+                        if str(item)=="AS":
+                            found=True
+                        elif found:
+                            if rename:
+                                renastr = renastr + ',' + str(column[2])
+                            else:
+                                renastr = "{Rename}" + "[" +str(column[0])+'('+ str(column[2]) +')' + '<-' + str(column[column.__len__() - 1]) + ','
+                                rename = True
+                            found=False
+
+        if rename:
+            Rastr = renastr + "]" + Rastr
+        Rastr+="]"
+        # WHERE conversion
+        wheref=False
+        for attr in whereExp:
+            #if agg function detected
+            aggfunc1 = False
+            aggfunc2 = False
+            #checks if and/or found
+            if str(attr) == "AND" or str(attr) == 'OR':
+                Rastr = Rastr + str(attr) + " "
+            # checks for where statement and converts to select
+            elif str(attr) == "WHERE":
+                Rastr = Rastr + '{Select}['
+                wheref=True
+            else:
+                for item in attr:
+                    if str(item) in Aggfunc:
+                        Rastr = Rastr + str(attr[0]) + '(' + str(attr[2]) + ')' + ' = ' + str(attr[5]) + ' '
+                        aggfunc1 = True
+                    elif str(item) in Aggfunc2:
+                        Rastr = Rastr + str(item) + '('
+                        aggfunc2 = True
+                    else:
+                        if aggfunc2:
+                            if item[0] in Aggfunc:
+                                Rastr = Rastr + str(item[0]) + '(' + str(item[2]) + ')' + '=' + str(item[5])
+                            elif str(item) == "AND" or str(item) == "OR":
+                                Rastr = Rastr + str(item) + " "
+                            else:
+                                Rastr = Rastr + str(item) + ') '
+                        elif not aggfunc1:
+                            Rastr = Rastr + str(item) + ' '
+                if aggfunc2:
+                    Rastr = Rastr + ')'
+        if wheref:
+            Rastr = Rastr + ']'
+
+        # FROM conversion of SQL
+        Rastr = Rastr + '['
+        first = True
+        for table in tables:
+            if first:
+                if table.__len__() == 1:
+                    Rastr = Rastr + str(table[0])
+                else:
+                    Rastr = Rastr + '{Rename}[' + str(table[2]) + ']' + str(table[0])
+                first = False
+            else:
+                if table.__len__() == 1:
+                    Rastr = Rastr + ' X ' + str(table[0])
+                elif table.__len__()==2:
+                    Rastr= Rastr + ' X {Rename}[' + str(table[1]) + ']' + str(table[0])
+                else:
+                    Rastr = Rastr + ' X {Rename}[' + str(table[2]) + ']' + str(table[0])
+
+        Rastr = Rastr + ']'
+    except Exception as e:
+        Rast=""
+        print("Error:",e)
+        if Rastr.endswith('['):
+            Rastr=Rastr[:-1]
+
+    return Rastr
+
+
+
+def selectTree(columns,whereExp,tables):
+    tablesN=[]
+    renameN=[]
+    renastrF=False
+    # RELATIONAL ALGEBRA TRANSLATION
+    Aggfunc = ['COUNT', 'MAX', 'MAX', 'AVG', 'SUM']
+    Aggfunc2 = ['GROUP BY', "HAVING"]
+    # SELECT conversion
+    # Create Regular Expression string
+    element = '{Projection}['
+
+    # first element of section
+    first = True
+    rename = False
+    # Projection NODE
+    try:
+        for column in columns:
+            if first:
+                if str(column[0]) in Aggfunc:
+                    element = element + str(column[column.__len__()-1])
+                else:
+                    element = element + str(column[0])
+                first = False
+            else:
+                if str(column[0]) in Aggfunc:
+                    element = element +','+ str(column[column.__len__() - 1])
+                else:
+                    element = element + ',' + str(column[0])
+            # Rename Set Node
+            projectionN=Node(element+']')
+            found=False
+            if column.__len__() > 1:
+                if 'AS' in str(column):
+                    for item in (column):
+                        if str(item)=="AS":
+                            found=True
+                        elif found:
+                            if rename:
+                                renastr = renastr + ',' + str(column[2])
+                            else:
+                                renastr = "{Rename}" + "[" +str(column[0])+'('+ str(column[2]) +')' + '<-' + str(column[column.__len__() - 1]) + ','
+                                rename = True
+                            found=False
+
+        if rename:
+            renastrN = Node(renastr+']')
+            renastrF=True
+        element=""
+        # WHERE To Nodes
+        wheref=False
+        for attr in whereExp:
+            #if agg function detected
+            aggfunc1 = False
+            aggfunc2 = False
+            #checks if and/or found
+            if str(attr) == "AND" or str(attr) == 'OR':
+                element = element + str(attr) + " "
+            # checks for where statement and converts to select
+            elif str(attr) == "WHERE":
+                element = element + '{Select}['
+                wheref=True
+            else:
+                for item in attr:
+                    if str(item) in Aggfunc:
+                        element = element + str(attr[0]) + '(' + str(attr[2]) + ')' + ' = ' + str(attr[5]) + ' '
+                        aggfunc1 = True
+                    elif str(item) in Aggfunc2:
+                        element = element + str(item) + '('
+                        aggfunc2 = True
+                    else:
+                        if aggfunc2:
+                            if item[0] in Aggfunc:
+                                element = element + str(item[0]) + '(' + str(item[2]) + ')' + '=' + str(item[5])
+                            elif str(item) == "AND" or str(item) == "OR":
+                                element = element + str(item) + " "
+                            else:
+                                element = element + str(item) + ') '
+                        elif not aggfunc1:
+                            element = element + str(item) + ' '
+                if aggfunc2:
+                    element = element + ')'
+        if wheref:
+            element = element + ']'
+        whereN=Node(element)
+        # Create Table Nodes and their rename
+        for table in tables:
+            if table.__len__() == 1:
+                tablesN.append(Node(str(table[0])))
+            elif table.__len__()==2:
+                tablesN.append(Node(str(table[0])))
+                renameN.append(Node('{RENAME}[' + str(table[1]) + ']'))
+            else:
+                tablesN.append(Node(str(table[0])))
+                renameN.append(Node('{RENAME}['+str(table[2])+']'))
+    except Exception as e:
+        print(e)
+    #create Tree
+
+    #Make Projection above Select Statment
+
+    #Checks if renamed Attr projected and makes renamed attr roots else makes Projection root
+    if renastrF:
+        renastrN.parent=projectionN
+        whereN.parent=renastrN
+    else:
+        whereN.parent=projectionN
+    root=projectionN
+    #swaps tablesN and rename data and makes TablesN the parrent of RenamesN
+    ftable=[]
+    if renameN.__len__()>0:
+        size=renameN.__len__()
+        for i in range(0,renameN.__len__()):
+            ftable.append(Node(renameN[i].name))
+            ftable[i].children=[tablesN[i]]
+    else:
+        for i in range(0,tablesN.__len__()):
+            ftable.append(Node(tablesN[i].name))
+    #Create Cross Product Roots
+    if ftable.__len__()==3:
+        tempcross=Node('X')
+        ftable[0].parent=tempcross
+        ftable[1].parent=tempcross
+        tempcross2=Node('X')
+        ftable[2].parent=tempcross2
+        tempcross.parent=tempcross2
+        tempcross2.parent=whereN
+    elif ftable.__len__()==2:
+        tempcross=Node('X')
+        ftable[0].parent=tempcross
+        ftable[1].parent=tempcross
+        tempcross.parent = whereN
+    elif ftable.__len__()==1:
+        ftable[0].parent=whereN
+    printtree(root)
+    root=optimizeTree(root,ftable,whereN)
+    return root
 
 def sqlparse(sql):
     # Define SQL tokens
@@ -66,10 +384,10 @@ def sqlparse(sql):
         (funcs + binop + columnRval) |
         (columnName + binop + columnRval) |
         (columnName + in_ + "(" + delimitedList(columnRval) + ")") |
-        (columnName + in_ + selectStmt) |
+        (columnName + in_ + Optional("(") + Group(selectStmt) + Optional(")")) |
         (Optional(not_) + exists_ + "(" + delimitedList(columnRval) + ")") |
-        (Optional(not_) + exists_ + selectStmt) |
-        (columnName + binop + selectStmt) |
+        (Optional(not_) + exists_ + Group(selectStmt)) |
+        (columnName + binop + Group(selectStmt)) |
         ("(" + whereExpression + ")")
     )
     whereExpression << whereCondition + Optional(Group(GROUP_BY + columnName + Optional(
@@ -98,6 +416,7 @@ def sqlparse(sql):
         print("ERROR MESSAGE:")
         print("-------------------------------------------")
         print(e)
+        return "error"
 
     # List of tables being used
 
@@ -238,6 +557,7 @@ def sqlparse(sql):
                                         valid = True
                     if (valid == False):
                         print(exp[1] + " in the group by clause is not a valid attribute")
+                        return "invalid"
                 else:
                     if (exp[0] == "COUNT" or exp[0] == "MAX" or exp[0] == "AVG" or exp[0] == "SUM"):
                         # Check if the attribute is valid
@@ -269,6 +589,8 @@ def sqlparse(sql):
 
                         if (valid == False):
                             print(exp[2] + " in the where clause is not a valid attribute")
+                            return "invalid"
+
                     elif ("." in exp[0]):
                         # Check if the attribute is valid
                         valid = False
@@ -297,6 +619,7 @@ def sqlparse(sql):
                             print(myTableRename + " is not a valid table name")
                         if (valid == False):
                             print(exp[0] + " in the where clause is not a valid attribute")
+                            return "invalid"
                     else:
                         # Check if the attribute is valid
                         # Go through tables being used, check if attribute belongs to one of them
@@ -321,107 +644,45 @@ def sqlparse(sql):
                             valid = True
                         if (valid == False):
                             print(exp[0] + " in the where clause is not a valid attribute")
+                            return "invalid"
+
+    #CHECKS FOR Correct table rename format
 
     print()
     print("-------------------------------------------")
     print()
+    Rastr=parseQsql(parsedQuery[1],whereExp,tables)
+    if parsedQuery.__len__()==11:
+        if parsedQuery[5]=="UNION":
+            Rastr+= "(UNION)"+parseQsql(parsedQuery[7],parsedQuery[10],parsedQuery[9])
+        if parsedQuery[5] == "INTERSECT":
+            Rastr += "(INTERSECT)" + parseQsql(parsedQuery[7], parsedQuery[10], parsedQuery[9])
+        if parsedQuery[5] == "EXCEPT":
+            Rastr += " - " + parseQsql(parsedQuery[7], parsedQuery[10], parsedQuery[9])
+    print("\nRelational Algebra Expression")
+    print(Rastr)
 
-    # RELATIONAL ALGEBRA TRANSLATION
-    Aggfunc = ['COUNT', 'MAX', 'MAX', 'AVG', 'SUM']
-    Aggfunc2 = ['GROUP BY', "HAVING"]
-    # SELECT conversion
-    # Create Regular Expression string
-    Rastr = '[(Projection)'
-
-    # first element of section
-    first = True
-    rename = False
-    # SELECT conversion
-    try:
-        for column in parsedQuery[1]:
-            if first:
-                if str(column[0]) in Aggfunc:
-                    Rastr = Rastr + str(column[0]) + '(' + str(column[2]) + ')'
-                else:
-                    Rastr = Rastr + str(column[0])
-                first = False
-            else:
-                if str(column[0]) in Aggfunc:
-                    Rastr = Rastr + ',' + str(column[0]) + '(' + str(column[2]) + ')'
-                else:
-                    Rastr = Rastr + ',' + str(column[0])
-
-            # Rename Set
-            found=False
-            if column.__len__() > 1:
-                if 'AS' in str(column):
-                    for item in (column):
-                        if str(item)=="AS":
-                            found=True
-                        elif found:
-                            if rename:
-                                renastr = renastr + ',' + str(column[2])
-                            else:
-                                renastr = "(Rename)" + "[" + str(column[2]) + '<-' + str(column[0]) + ','
-                                rename = True
-                            found=False
-
-        if rename:
-            Rastr = renastr + "]" + Rastr
-        Rastr+="]"
-        # WHERE conversion
-        wheref=False
-        for attr in whereExp:
-            #if agg function detected
-            aggfunc1 = False
-            aggfunc2 = False
-            #checks if and/or found
-            if str(attr) == "AND" or str(attr) == 'OR':
-                Rastr = Rastr + str(attr) + " "
-            # checks for where statement and converts to select
-            elif str(attr) == "WHERE":
-                Rastr = Rastr + '(Select)['
-                whereF=True
-            else:
-                for item in attr:
-                    if item in Aggfunc:
-                        Rastr = Rastr + str(attr[0]) + '(' + str(attr[2]) + ')' + ' = ' + str(attr[5]) + ' '
-                        aggfunc1 = True
-                    elif str(item) in Aggfunc2:
-                        Rastr = Rastr + str(item) + '('
-                        aggfunc2 = True
-                    else:
-                        if aggfunc2:
-                            if item[0] in Aggfunc:
-                                Rastr = Rastr + str(item[0]) + '(' + str(item[2]) + ')' + '=' + str(item[5]) + ' '
-                            elif str(item) == "AND" or str(item) == "OR":
-                                Rastr = Rastr + str(item) + " "
-                            else:
-                                Rastr = Rastr + str(item) + ') '
-                        elif not aggfunc1:
-                            Rastr = Rastr + str(item) + ' '
-                if aggfunc2:
-                    Rastr = Rastr + ')'
-        if wheref:
-            Rastr = Rastr + ']'
-        # FROM conversion of SQL
-        Rastr = Rastr + '['
-        first = True
-        for table in tables:
-            if first:
-                if table.__len__() == 1:
-                    Rastr = Rastr + str(table[0])
-                else:
-                    Rastr = Rastr + '(Rename)[' + str(table[2]) + ']' + str(table[0])
-                first = False
-            else:
-                if table.__len__() == 1:
-                    Rastr = Rastr + ' x ' + str(table[0])
-                else:
-                    Rastr = Rastr + 'x (Rename)[' + str(table[2]) + ']' + str(table[0])
-
-        Rastr = Rastr + ']'
-    except Exception as e:
-        Rast=""
-        print("Error:",e)
-    return Rastr
+    root=selectTree(parsedQuery[1],whereExp,tables)
+    if parsedQuery.__len__()==11:
+        if parsedQuery[5]=="UNION":
+            nroot=Node('{UNION}')
+            root.parent=nroot
+            temp2=selectTree(parsedQuery[7],parsedQuery[10],parsedQuery[9])
+            temp2.parent=nroot
+            printtree(nroot)
+            return nroot
+        if parsedQuery[5] == "INTERSECT":
+            nroot=Node('{INTERSECT}')
+            root.parent=nroot
+            temp2=selectTree(parsedQuery[7],parsedQuery[10],parsedQuery[9])
+            temp2.parent=nroot
+            printtree(nroot)
+            return nroot
+        if parsedQuery[5] == "EXCEPT":
+            nroot=Node('{-}')
+            root.parent=nroot
+            temp2=selectTree(parsedQuery[7],parsedQuery[10],parsedQuery[9])
+            temp2.parent=nroot
+            printtree(nroot)
+            return nroot
+    return root
