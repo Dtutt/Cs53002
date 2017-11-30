@@ -66,10 +66,10 @@ def sqlparse(sql):
         (funcs + binop + columnRval) |
         (columnName + binop + columnRval) |
         (columnName + in_ + "(" + delimitedList(columnRval) + ")") |
-        (columnName + in_ + Optional("(") + selectStmt + Optional(")")) |
+        (columnName + in_ + Optional("(") + Group(selectStmt) + Optional(")")) |
         (Optional(not_) + exists_ + "(" + delimitedList(columnRval) + ")") |
-        (Optional(not_) + exists_ + selectStmt) |
-        (columnName + binop + selectStmt) |
+        (Optional(not_) + exists_ + Group(selectStmt)) |
+        (columnName + binop + Group(selectStmt)) |
         ("(" + whereExpression + ")")
     )
     whereExpression << whereCondition + Optional(Group(GROUP_BY + columnName + Optional(
